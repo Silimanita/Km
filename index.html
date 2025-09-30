@@ -5,145 +5,455 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Kilometraje del Coche</title>
     <style>
+        /* Estilos del diseño original */
         body {font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;margin:0;padding:20px;display:flex;justify-content:center;align-items:flex-start;}
         .container {background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.1);max-width:1200px;width:100%;animation:slideIn 0.6s ease-out;}
         @keyframes slideIn {from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-        h1 {text-align:center;color:#333;margin-bottom:30px;font-size:2.2em;background:linear-gradient(45deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        
+        /* TÍTULO COMPACTO */
+        h1 {
+            text-align:center;
+            color:#333;
+            margin-bottom:15px;
+            font-size:1.8em;
+            background:linear-gradient(45deg,#667eea,#764ba2);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+            line-height: 1;
+        }
         .controls {background:#f8f9fa;padding:20px;border-radius:15px;margin-bottom:25px;border:2px solid #e9ecef;}
-        .input-group {display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-bottom:15px;}
-        .input-group label {font-weight:600;color:#495057;min-width:120px;}
-        .input-group input {padding:10px 15px;border:2px solid #dee2e6;border-radius:8px;font-size:14px;transition:all 0.3s ease;min-width:150px;}
-        /* Ajuste de los campos para que se vean mejor */
-        .input-group .km-input { min-width: 110px; }
-        .input-group .km-label { min-width: 90px; }
-        .input-group .km-row { display: flex; align-items: center; gap: 15px; }
-        .input-group input:focus {outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
-        .buttons {display:flex;gap:10px;flex-wrap:wrap;}
-        button {background:linear-gradient(45deg,#667eea,#764ba2);color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.3s ease;}
-        button:hover {transform:translateY(-2px);box-shadow:0 5px 15px rgba(102,126,234,0.4);}
-        .btn-secondary {background:linear-gradient(45deg,#6c757d,#495057);}
-        .btn-danger {background:linear-gradient(45deg,#dc3545,#c82333);}
-        .table-container {background:white;border-radius:15px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.1);border:1px solid #e9ecef;}
-        table {width:100%;border-collapse:collapse;font-size:14px;}
-        th {background:linear-gradient(45deg,#667eea,#764ba2);color:white;padding:15px 10px;text-align:center;font-weight:600;font-size:13px;}
-        td {padding:12px 10px;text-align:center;border-bottom:1px solid #f1f3f4;transition:background-color 0.2s ease;}
+        
+        /* Contenedor principal para los campos - Usamos Flexbox para control fino */
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 20px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+        
+        /* Ajuste clave: Solo la fila de fecha debe estar centrada sola */
+        .input-row-centered {
+            justify-content: center;
+        }
+        /* Contenedor individual de campo (Label + Input) */
+        .field-item {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-width: 100px;
+        }
+        .field-item label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .field-item input {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+        }
+        /* AJUSTES DE ANCHO ESPECÍFICOS (Controles de entrada) */
+        .field-full-line { width: 150px; min-width: 150px; margin: 0 auto; }
+        .field-km-data { width: 120px; min-width: 120px; }
+        
+        /* Contenedor para la Ruta y KM Ruta que deben ir juntos */
+        .field-group {
+            display: flex;
+            flex-grow: 1;
+            gap: 20px;
+        }
+        
+        /* Ruta (flexible, toma la mayor parte del espacio) */
+        .field-ruta { flex-grow: 1; min-width: 60%; }
+        /* KM Ruta (fijo, mantiene su tamaño) */
+        .field-km-ruta { flex-grow: 0; min-width: 90px; width: 90px; }
+        .field-item input:focus {outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1);} 
+        
+        /* BOTONES COMPACTOS */
+        .buttons {
+            display:flex;
+            gap:10px;
+            flex-wrap: nowrap;
+            margin-top:20px;
+            justify-content: space-between;
+        }
+        
+        button {
+            background:linear-gradient(45deg,#667eea,#764ba2);
+            color:white;
+            border:none;
+            padding:12px 20px;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:600;
+            transition:all 0.3s ease;
+            flex-grow: 1;
+            min-width: 80px;
+            white-space: nowrap;
+        }
+        
+        .button-compact-text {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        button:hover {transform:translateY(-2px);box-shadow:0 5px 15px rgba(102,126,234,0.4);} 
+        .btn-secondary {background:linear-gradient(45deg,#6c757d,#495057);} 
+        .btn-secondary:hover {box-shadow:0 5px 15px rgba(108,117,125,0.4);} 
+        .btn-danger {background:linear-gradient(45deg,#dc3545,#c82333);} 
+        .btn-danger:hover {box-shadow:0 5px 15px rgba(220,53,69,0.4);} 
+        .table-container {background:white;border-radius:15px;overflow-x: auto; box-shadow:0 10px 25px rgba(0,0,0,0.1);border:1px solid #e9ecef;}
+        
+        /* ESTILOS DE LA TABLA COMPACTA */
+        table {width:100%;border-collapse:collapse;font-size:14px;table-layout: fixed;}
+        
+        /* Encabezados */
+        th {
+            background:linear-gradient(45deg,#667eea,#764ba2);
+            color:white;
+            padding:10px 5px;
+            text-align:center;
+            font-weight:600;
+            font-size:12px;
+            position:sticky;
+            top:0;
+            white-space: nowrap;
+        }
+        
+        /* Celdas de Datos */
+        td {
+            padding:8px 5px;
+            text-align:center;
+            border-bottom:1px solid #f1f3f4;
+            transition:background-color 0.2s ease;
+            word-break: break-word;
+        }
+        
         tr:nth-child(even){background-color:#f8f9fa;} tr:hover{background-color:#e3f2fd;}
+        /* Estilo para números - Fuente monoespacio y negrita para uniformidad */
         .number {font-family:'Courier New',monospace;font-weight:600;}
         .total-row {background:linear-gradient(45deg,#28a745,#20c997)!important;color:white;font-weight:bold;}
         .summary {background:#f8f9fa;padding:20px;border-radius:15px;margin-top:20px;border:2px solid #e9ecef;}
         .summary h3 {color:#495057;margin-bottom:15px;font-size:1.3em;}
         .summary-item {display:flex;justify-content:space-between;margin-bottom:8px;padding:5px 0;border-bottom:1px solid #dee2e6;}
         .summary-value {font-weight:600;color:#667eea;}
-        .small-btn {padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;min-width:60px;}
+        .small-btn {padding:5px 8px;border-radius:6px;font-weight:600;cursor:pointer;min-width:40px;margin:2px;font-size: 11px;}
         .btn-edit {background:linear-gradient(45deg,#ffc107,#e0a800);color:#000;border:none;}
         .btn-delete {background:linear-gradient(45deg,#dc3545,#c82333);color:white;border:none;}
-        @media(max-width:768px){.container{padding:20px;}.input-group{flex-direction:column;}.input-group .km-row { flex-direction: column; } }
-        .alert {background:#d4edda;color:#155724;padding:10px 15px;border-radius:8px;margin-bottom:15px;border-left:4px solid #28a745;display:none;}
+        .alert {background:#d4edda;color:#155724;padding:10px 15px;border-radius:8px;margin-bottom:15px;border-left:44px solid #28a745;display:none;font-weight: 600;}
+        .loading {text-align:center;padding:20px;font-size:1.2em;color:#667eea;}
+        /* Anchos fijos de columnas para tabla compacta */
+        #tablaKm th:nth-child(1), #tablaKm td:nth-child(1) { width: 10%; } /* Día */
+        #tablaKm th:nth-child(3), #tablaKm td:nth-child(3) { width: 15%; } /* KM Ruta */
+        #tablaKm th:nth-child(4), #tablaKm td:nth-child(4) { width: 20%; } /* KM Total */
+        #tablaKm th:nth-child(5), #tablaKm td:nth-child(5) { width: 15%; } /* Acciones */
+        #tablaKm th:nth-child(2), #tablaKm td:nth-child(2) { width: 40%; } /* Ruta (Flex) */
+        
+        /* Ajuste de Total en fila de resumen */
+        .total-row .total-icon {
+            font-size: 1.2em; /* Sigma */
+            font-weight: bold;
+        }
+        
+        /* Clase para el contador de viajes en el total (Ajustado al formato .number) */
+        .total-row .total-count {
+            font-family:'Courier New', monospace; /* Misma fuente que los KM */
+            font-size: 14px;
+            white-space: nowrap;
+            font-weight: 600; /* Misma negrita que los KM */
+            padding-top: 2px;
+        }
+        /* Media Query para Móviles (Ancho < 768px) */
+        @media(max-width:768px){
+            .container{padding:15px;}
+            
+            /* Aseguramos que los campos de datos de KM Inicial / KM Final y Ruta / KM Ruta se mantengan en su fila,
+            * pero permitimos que los contenedores de columna se hagan más estrechos para caber */
+            .field-km-data { width: 100px; min-width: 100px; }
+            
+            /* En móvil, permitimos que la ruta ocupe todo el espacio y el KM Ruta mantenga su ancho fijo */
+            .field-group { gap: 10px; }
+            .field-km-ruta { min-width: 80px; width: 80px; } /* Más estrecho */
+            /* Ajustes de columnas para que quepan en móviles */
+            #tablaKm th:nth-child(1), #tablaKm td:nth-child(1) { width: 10%; }
+            #tablaKm th:nth-child(3), #tablaKm td:nth-child(3) { width: 18%; }
+            #tablaKm th:nth-child(4), #tablaKm td:nth-child(4) { width: 25%; }
+            #tablaKm th:nth-child(5), #tablaKm td:nth-child(5) { width: 20%; }
+            #tablaKm th:nth-child(2), #tablaKm td:nth-child(2) { width: 27%; text-align: left; }
+            
+            /* Títulos de tabla en móvil */
+            th {font-size: 11px; padding: 10px 3px;}
+            td {font-size: 12px; padding: 6px 3px;}
+        }
+        /* --- ESTILOS DEL MODAL DE CONFIRMACIÓN --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Oculto por defecto */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content h4 {
+            color: #dc3545;
+            margin-top: 0;
+            font-size: 1.4em;
+        }
+        .modal-content p {
+            color: #495057;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .modal-buttons button {
+            flex-grow: 1;
+            margin: 0 5px;
+            padding: 10px 15px;
+            min-width: 100px;
+            font-size: 14px;
+        }
+        .btn-confirm-yes {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+        .btn-confirm-no {
+            background: linear-gradient(45deg, #6c757d, #495057);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚗 Control de Kilometraje del Coche</h1>
+        <h1>🚗 Control KM</h1>
         <div id="loadAlert" class="alert"></div>
         <div class="controls">
-            <div class="input-group">
-                <label>Mes/Año:</label>
-                <input type="month" id="mesAnio">
-                <div class="km-row">
-                    <label class="km-label">KM inicial del mes:</label>
-                    <input type="text" id="kmInicial" class="km-input" placeholder="Ej: 50.000">
-                </div>
-                <div class="km-row">
-                    <label class="km-label">KM final de hoy:</label>
-                    <input type="text" id="kmFinalHoy" class="km-input" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 14.500 (opcional)">
+            <!-- LÍNEA 1: Fecha del Viaje (SOLA Y CENTRADA) -->
+            <div class="input-row input-row-centered">
+                <div class="field-item field-full-line">
+                    <label for="fechaViaje">Fecha del Viaje:</label>
+                    <input type="date" id="fechaViaje">
                 </div>
             </div>
-            <div class="input-group">
-                <label>Día:</label>
-                <input type="number" id="dia" min="1" max="31" placeholder="Día">
-                <label>Ruta realizada:</label>
-                <input type="text" id="ruta" placeholder="Ej: Candelaria">
-                <label>KM recorridos:</label>
-                <input type="text" id="kmRecorridos" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 150">
+            <!-- LÍNEA 2: KM Inicial y KM Total HOY (LADO A LADO) -->
+            <div class="input-row">
+                <!-- KM inicial mes -->
+                <div class="field-item field-km-data">
+                    <label for="kmInicial">KM inicial mes:</label>
+                    <input type="text" id="kmInicial" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 50.000" maxlength="7">
+                </div>
+                
+                <!-- KM total hoy -->
+                <div class="field-item field-km-data">
+                    <label for="kmFinalHoy">KM total hoy:</label>
+                    <input type="text" id="kmFinalHoy" inputmode="numeric" pattern="[0-9]*" placeholder="Ej: 14.500" maxlength="7">
+                </div>
             </div>
+            
+            <!-- LÍNEA 3: Ruta y KM Ruta (Ruta más larga) -->
+            <!-- Usamos un field-group interno para forzar que estos dos elementos se mantengan juntos -->
+            <div class="input-row">
+                <div class="field-group">
+                    <!-- Ruta -->
+                    <div class="field-item field-ruta">
+                        <label for="ruta">Ruta:</label>
+                        <input type="text" id="ruta" placeholder="Ej: Candelaria / Santa Cruz" maxlength="25">
+                    </div>
+                    
+                    <!-- KM Ruta -->
+                    <div class="field-item field-km-ruta">
+                        <label for="kmRecorridos">KM Ruta:</label>
+                        <input type="text" id="kmRecorridos" inputmode="numeric" pattern="[0-9]*" placeholder="150" maxlength="3">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones - Compactos y en una sola línea -->
             <div class="buttons">
-                <button onclick="agregarRegistro()">➕ Agregar Registro</button>
-                <button onclick="guardarDatos()" class="btn-secondary">💾 Guardar datos</button>
-                <button onclick="limpiarTabla()" class="btn-danger">🗑️ Limpiar Todo</button>
+                <button onclick="agregarRegistro()" class="button-compact-text">➕ Agregar</button>
+                <button onclick="guardarDatos()" class="btn-secondary button-compact-text">💾 Guardar</button>
+                <button onclick="limpiarTabla()" class="btn-danger button-compact-text">🗑️ Limpiar</button>
             </div>
         </div>
+        
         <div class="table-container">
             <table id="tablaKm">
-                <thead><tr><th>Día</th><th>Ruta Realizada</th><th>KM Recorridos</th><th>KM Total del Coche</th><th>Acciones</th></tr></thead>
-                <tbody id="cuerpoTabla"></tbody>
+                <thead><tr><th>Día</th><th>Ruta</th><th>KM Ruta</th><th>KM Total</th><th>Acciones</th></tr></thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;">Añade registros para ver la tabla.</td></tr>
+                </tbody>
             </table>
         </div>
         <div class="summary">
-            <h3>📈 Resumen del Mes</h3>
-            <div class="summary-item"><span>Total KM recorridos en el mes:</span><span class="summary-value" id="totalKmMes">0 km</span></div>
+            <h3>📈 Resumen del Mes (<span id="mesActual"></span>)</h3>
+            <div class="summary-item"><span>Total Km recorridos mes:</span><span class="summary-value" id="totalKmMes">0 km</span></div>
             <div class="summary-item"><span>KM inicial del coche:</span><span class="summary-value" id="kmInicialMes">0 km</span></div>
-            <div class="summary-item"><span>KM final estimado del coche:</span><span class="summary-value" id="kmFinalMes">0 km</span></div>
+            <div class="summary-item"><span>KM final estimado:</span><span class="summary-value" id="kmFinalMes">0 km</span></div>
             <div class="summary-item"><span>Número de viajes registrados:</span><span class="summary-value" id="numeroViajes">0</span></div>
         </div>
     </div>
+    <!-- MODAL DE CONFIRMACIÓN (NUEVA ESTRUCTURA) -->
+    <div id="limpiezaModal" class="modal-overlay">
+        <div class="modal-content">
+            <h4>🗑️ Confirmar Limpieza de Datos</h4>
+            <p>¿Estás seguro de que deseas borrar **TODOS** los registros y el KM inicial del mes de <span id="modalMesAnio"></span>? Esta acción es **permanente** y no se puede deshacer.</p>
+            <div class="buttons modal-buttons">
+                <button onclick="confirmarLimpieza(true)" class="btn-confirm-yes">Sí, Borrar Todo</button>
+                <button onclick="confirmarLimpieza(false)" class="btn-confirm-no">No, Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- FIN MODAL -->
     <script>
-        let registros = [], kmInicialDelMes = 0;
-
-        const formatNumber = num => {
+        // Variables globales
+        let registros = [];
+        let kmInicialDelMes = 0;
+        let selectedMesAnioKey = new Date().toISOString().slice(0, 7); // Clave de almacenamiento: AAAA-MM
+        // --- Funciones de utilidad ---
+        window.formatNumber = (num) => {
             if (num == null) return '0';
             const sign = Number(num) < 0 ? '-' : '';
             const n = Math.abs(Math.round(Number(num)));
             return sign + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         };
-
-        const parseInputValue = v => {
+        window.parseInputValue = (v) => {
             if (!v) return 0;
-            const s = String(v).trim();
+            // Elimina puntos (separadores de miles) y comas (si se usaran), y luego extrae solo dígitos
+            const s = String(v).trim().replace(/[\.,]/g, '');
             const sign = s.startsWith('-') ? '-' : '';
             const digits = s.replace(/[^0-9]/g, '');
             return digits ? parseInt(sign + digits, 10) : 0;
         };
-
-        function guardarDatos() {
-            const mesAnio = document.getElementById('mesAnio').value;
-            const savedData = {
-                mesAnio: mesAnio,
-                kmInicial: kmInicialDelMes,
-                registros: registros
-            };
-            localStorage.setItem('controlKmData', JSON.stringify(savedData));
+        
+        function mostrarAlerta(mensaje, bgColor, textColor, borderColor) {
             const alert = document.getElementById('loadAlert');
-            alert.textContent = '✅ Datos guardados en el navegador correctamente.';
+            alert.textContent = mensaje;
+            alert.style.backgroundColor = bgColor;
+            alert.style.color = textColor;
+            alert.style.borderLeftColor = borderColor;
             alert.style.display = 'block';
             setTimeout(() => {
                 alert.style.display = 'none';
+                alert.style.backgroundColor = '';
+                alert.style.color = '';
+                alert.style.borderLeftColor = '';
             }, 3000);
         }
-
-        function cargarDatos() {
-            const savedData = localStorage.getItem('controlKmData');
-            if (savedData) {
-                try {
-                    const datos = JSON.parse(savedData);
-                    registros = datos.registros || [];
-                    kmInicialDelMes = datos.kmInicial || 0;
-                    document.getElementById('mesAnio').value = datos.mesAnio || new Date().toISOString().slice(0, 7);
-                    document.getElementById('kmInicial').value = formatNumber(kmInicialDelMes);
-                    actualizarTabla();
-                    actualizarResumen();
-                    const alert = document.getElementById('loadAlert');
-                    alert.textContent = '✅ Datos cargados correctamente del navegador';
-                    alert.style.display = 'block';
-                    setTimeout(() => {
-                        alert.style.display = 'none';
-                    }, 3000);
-                } catch (e) {
-                    console.error("Error al cargar datos de localStorage:", e);
-                }
+        // --- LÓGICA DE PERSISTENCIA (localStorage) ---
+        /** Carga los datos de localStorage para la clave del mes/año actual. */
+        window.cargarDatos = function() {
+            const fechaInput = document.getElementById('fechaViaje').value;
+            let nuevaClave = fechaInput ? fechaInput.slice(0, 7) : new Date().toISOString().slice(0, 7);
+            
+            if (nuevaClave !== selectedMesAnioKey) {
+                selectedMesAnioKey = nuevaClave;
             }
+            
+            const data = JSON.parse(localStorage.getItem(`KmControlData-${selectedMesAnioKey}`) || '{}');
+            registros = data.registros || [];
+            kmInicialDelMes = data.kmInicial || 0;
+            
+            registros.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            document.getElementById('kmInicial').value = formatNumber(kmInicialDelMes);
+            // Actualizar nombre del mes en el resumen y modal
+            const [year, month] = selectedMesAnioKey.split('-');
+            const dateForMonth = new Date(year, month - 1);
+            const mesAnioTexto = dateForMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            document.getElementById('mesActual').textContent = mesAnioTexto;
+            document.getElementById('modalMesAnio').textContent = mesAnioTexto; // Para el modal
+            
+            actualizarUI();
+        };
+        /** Guarda los datos actuales en localStorage. */
+        window.guardarDatos = function() {
+            const kmIniInput = parseInputValue(document.getElementById('kmInicial').value);
+            // Si el valor del input ha cambiado, actualizamos la variable global
+            if (kmIniInput !== kmInicialDelMes) {
+                kmInicialDelMes = kmIniInput;
+            }
+            const dataToSave = {
+                mesAnio: selectedMesAnioKey,
+                kmInicial: kmInicialDelMes,
+                registros: registros
+            };
+            localStorage.setItem(`KmControlData-${selectedMesAnioKey}`, JSON.stringify(dataToSave));
+            actualizarUI();
+            mostrarAlerta('💾 Datos guardados en la memoria local.', '#d0efff', '#004085', '#007bff');
+        };
+        /** * Muestra el modal de confirmación para limpiar la tabla.
+         * Se llama al hacer clic en el botón "🗑️ Limpiar".
+         */
+        window.limpiarTabla = function() {
+            const modal = document.getElementById('limpiezaModal');
+            // 1. Validación: Si no hay datos, no hace falta preguntar
+            if (registros.length === 0 && kmInicialDelMes === 0) {
+                mostrarAlerta('No hay registros o datos iniciales para limpiar.', '#fff3cd', '#856404', '#ffc107');
+                return;
+            }
+            // 2. Mostrar el modal
+            document.getElementById('modalMesAnio').textContent = document.getElementById('mesActual').textContent;
+            modal.classList.add('active');
+        };
+        /** * Maneja la confirmación o cancelación de la limpieza de datos.
+         * Se llama al hacer clic en los botones "Sí" o "No" del modal.
+         */
+        window.confirmarLimpieza = function(esConfirmado) {
+            const modal = document.getElementById('limpiezaModal');
+            modal.classList.remove('active'); // Ocultar el modal
+            if (!esConfirmado) {
+                mostrarAlerta('⚠️ Limpieza cancelada.', '#fff3cd', '#856404', '#ffc107');
+                return;
+            }
+            
+            // 1. Eliminar datos persistentes
+            localStorage.removeItem(`KmControlData-${selectedMesAnioKey}`);
+            
+            // 2. Resetear variables locales
+            kmInicialDelMes = 0;
+            registros = [];
+            
+            // 3. Resetear campos de entrada
+            document.getElementById('kmInicial').value = '';
+            document.getElementById('kmFinalHoy').value = '';
+            document.getElementById('kmRecorridos').value = '';
+            // 4. Actualizar UI
+            actualizarUI();
+            mostrarAlerta('🗑️ Historial del mes eliminado de la memoria local. ¡Listo para empezar un nuevo mes!', '#f8d7da', '#721c24', '#dc3545');
+        };
+        // --- LÓGICA DE UI Y CÁLCULOS ---
+        function actualizarUI() {
+            actualizarTabla();
+            actualizarResumen();
         }
-
-        const addInputFormatter = (id, max = null) => {
+        window.addInputFormatter = (id, max = null) => {
             const input = document.getElementById(id);
             input.addEventListener('input', () => {
                 let raw = input.value.replace(/\./g, '');
@@ -157,21 +467,18 @@
                     return;
                 }
                 if (max !== null && num > max) {
-                    alert(`El valor máximo permitido es ${max}.`);
-                    input.value = '';
-                    return;
+                    // No se fuerza, solo se advierte si el usuario intenta ingresar más de 999 en KM Ruta
                 }
                 input.value = formatNumber(num);
             });
         };
-
-        const addKmFinalFormatter = () => {
+        window.addKmFinalFormatter = () => {
             const input = document.getElementById('kmFinalHoy');
+            // Formatear el número mientras se escribe (añadir puntos de miles)
             input.addEventListener('input', () => {
                 let raw = input.value.replace(/\./g, '');
                 if (raw === '') {
                     input.value = '';
-                    document.getElementById('kmRecorridos').value = '';
                     return;
                 }
                 let num = parseInt(raw.replace(/[^0-9]/g, ''), 10);
@@ -181,218 +488,206 @@
                 }
                 input.value = formatNumber(num);
             });
+            
+            // Llama a calcularKmRecorridos cuando el campo pierde el foco (blur)
             input.addEventListener('blur', () => {
                 if (input.value.trim()) {
                     calcularKmRecorridos();
-                }
-            });
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && input.value.trim()) {
-                    calcularKmRecorridos();
+                } else {
+                    document.getElementById('kmRecorridos').value = '';
                 }
             });
         };
-
-        addInputFormatter('kmInicial');
-        addInputFormatter('kmRecorridos', 999);
-        addKmFinalFormatter();
-
-        const diaInput = document.getElementById('dia');
-        diaInput.addEventListener('input', () => {
-            let n = parseInt(diaInput.value.replace(/[^0-9]/g, ''), 10);
-            if (isNaN(n)) {
-                diaInput.value = '';
-                return;
-            }
-            if (n < 1 || n > 31) {
-                alert('El día debe estar entre 1 y 31.');
-                diaInput.value = '';
-                return;
-            }
-            diaInput.value = n;
-        });
-
-        function calcularKmRecorridos() {
+        window.calcularKmRecorridos = function() {
             const kmFinalHoy = parseInputValue(document.getElementById('kmFinalHoy').value);
-            const kmInicial = parseInputValue(document.getElementById('kmInicial').value);
-
-            if (!kmInicial && registros.length === 0) {
-                 alert('Por favor, introduce primero el KM inicial del mes.');
-                 document.getElementById('kmFinalHoy').value = '';
-                 return;
+            const kmInicialInput = parseInputValue(document.getElementById('kmInicial').value);
+            // Determinar la base de KM Inicial: Usa el guardado (kmInicialDelMes) o el del input (kmInicialInput)
+            const baseKmInicial = kmInicialDelMes > 0 ? kmInicialDelMes : kmInicialInput;
+            // 1. Si no hay KM total hoy, salimos.
+            if (!kmFinalHoy) {
+                document.getElementById('kmRecorridos').value = '';
+                return;
             }
             
-            if (kmInicial && kmInicialDelMes === 0) {
-                 kmInicialDelMes = kmInicial;
-            }
-
-            if (!kmFinalHoy) {
+            // 2. Validación de KM Inicial.
+            if (!baseKmInicial) {
+                mostrarAlerta('⛔ Error: Introduce el KM inicial del mes para calcular la ruta.', '#f8d7da', '#721c24', '#dc3545');
+                document.getElementById('kmRecorridos').value = '';
                 return;
             }
-
+            // 3. Calcular KM Acumulado (base inicial + total de registros anteriores)
             const totalRecorrido = registros.reduce((sum, r) => sum + r.kmRecorridos, 0);
-            const kmActualAcumulado = kmInicialDelMes + totalRecorrido;
-
-            if (kmFinalHoy <= kmActualAcumulado) {
-                alert(`El KM final de hoy (${formatNumber(kmFinalHoy)}) debe ser mayor que el acumulado actual (${formatNumber(kmActualAcumulado)}).`);
-                document.getElementById('kmFinalHoy').value = '';
+            const kmActualAcumulado = baseKmInicial + totalRecorrido;
+            // 4. Validación de la lógica
+            if (kmFinalHoy < kmActualAcumulado) {
+                mostrarAlerta(`⛔ Error: El KM total hoy (${formatNumber(kmFinalHoy)}) es menor que el KM acumulado actual (${formatNumber(kmActualAcumulado)}).`, '#f8d7da', '#721c24', '#dc3545');
                 document.getElementById('kmRecorridos').value = '';
                 return;
             }
-
+            // 5. Cálculo final: KM Ruta = KM total hoy - KM acumulado
             const kmRecorridosHoy = kmFinalHoy - kmActualAcumulado;
-
-            if (kmRecorridosHoy > 999) {
-                alert(`Los KM recorridos calculados (${formatNumber(kmRecorridosHoy)}) exceden el máximo permitido de 999 km.`);
-                document.getElementById('kmFinalHoy').value = '';
+            if (kmRecorridosHoy < 0) { // En caso de errores lógicos o de entrada
+                mostrarAlerta('⛔ Error: Cálculo negativo de KM Ruta. Revisa tus entradas.', '#f8d7da', '#721c24', '#dc3545');
                 document.getElementById('kmRecorridos').value = '';
                 return;
             }
-
+            if (kmRecorridosHoy > 999) {
+                mostrarAlerta(`⚠️ Advertencia: Los KM Ruta calculados (${formatNumber(kmRecorridosHoy)}) exceden 999 km.`, '#fff3cd', '#856404', '#ffc107');
+            }
+            // 6. Colocar el resultado en KM Ruta
             document.getElementById('kmRecorridos').value = formatNumber(kmRecorridosHoy);
-            document.getElementById('kmFinalHoy').value = '';
         }
-
-        function agregarRegistro() {
-            const dia = parseInt(document.getElementById('dia').value, 10);
+        window.agregarRegistro = function() {
+            const fechaString = document.getElementById('fechaViaje').value;
             const ruta = document.getElementById('ruta').value.trim();
             const kmRec = parseInputValue(document.getElementById('kmRecorridos').value);
-            const kmIni = parseInputValue(document.getElementById('kmInicial').value);
-
-            if (!dia || dia < 1 || dia > 31) {
-                alert('Día inválido.');
+            const kmIniInput = parseInputValue(document.getElementById('kmInicial').value);
+            
+            // 1. Validaciones
+            if (!fechaString) {
+                mostrarAlerta('Debes seleccionar una fecha de viaje con el calendario.', '#f8d7da', '#721c24', '#dc3545');
+                return;
+            }
+            if (fechaString.slice(0, 7) !== selectedMesAnioKey) {
+                mostrarAlerta(`La fecha seleccionada (${fechaString}) no corresponde al mes activo (${selectedMesAnioKey}). Por favor, recarga los datos del mes correcto.`, '#f8d7da', '#721c24', '#dc3545');
                 return;
             }
             if (!ruta) {
-                alert('Ruta vacía.');
+                mostrarAlerta('Ruta vacía.', '#f8d7da', '#721c24', '#dc3545');
                 return;
             }
-            if (!kmRec || kmRec < 1 || kmRec > 999) {
-                alert('KM recorridos inválidos. (1-999)');
+            if (!kmRec || kmRec < 1) {
+                mostrarAlerta('KM Ruta inválidos. Debe ser un número positivo.', '#f8d7da', '#721c24', '#dc3545');
                 return;
             }
-
-            if (kmIni && kmInicialDelMes === 0) {
-                kmInicialDelMes = kmIni;
+            if (kmRec > 999) {
+                mostrarAlerta('KM Ruta no puede exceder 999 km en un solo registro.', '#f8d7da', '#721c24', '#dc3545');
+                return;
             }
-
-            const existe = registros.find(r => r.dia === dia);
-            if (existe) {
-                if (!confirm('Ya existe un registro para este día. ¿Reemplazarlo?')) return;
-                registros = registros.filter(r => r.dia !== dia);
+            
+            // 2. Establecer KM Inicial si es la primera vez
+            if (kmIniInput && kmInicialDelMes === 0) {
+                kmInicialDelMes = kmIniInput;
+                guardarDatos(); // Guardar KM inicial inmediatamente
+            } else if (kmInicialDelMes === 0) {
+                mostrarAlerta('Por favor, introduce el KM inicial mes y guárdalo antes de añadir el primer registro.', '#f8d7da', '#721c24', '#dc3545');
+                return;
             }
-
-            registros.push({
-                dia: dia,
-                ruta: ruta,
-                kmRecorridos: kmRec
-            });
-            registros.sort((a, b) => a.dia - b.dia);
-
-            document.getElementById('dia').value = '';
+            // 3. Manejar duplicados
+            const existeIndex = registros.findIndex(r => r.fecha === fechaString);
+            const nuevoRegistro = { fecha: fechaString, ruta: ruta, kmRecorridos: kmRec };
+            if (existeIndex !== -1) {
+                // Nota: Usamos prompt aquí en lugar de window.confirm()
+                const confirmar = window.prompt(`Ya existe un registro para la fecha ${fechaString}. Escribe "REEMPLAZAR" para actualizarlo.`);
+                if (confirmar !== 'REEMPLAZAR') return;
+                registros[existeIndex] = nuevoRegistro;
+            } else {
+                registros.push(nuevoRegistro);
+            }
+            // 4. Limpiar campos y ordenar
+            document.getElementById('fechaViaje').value = new Date().toISOString().slice(0, 10); // Restaurar a fecha actual
             document.getElementById('ruta').value = '';
             document.getElementById('kmRecorridos').value = '';
-            document.getElementById('kmFinalHoy').value = '';
-
-            actualizarTabla();
-            actualizarResumen();
+            document.getElementById('kmFinalHoy').value = ''; // Limpiar el campo opcional
+            
+            // 5. Guardar
             guardarDatos();
         }
-
-        function actualizarTabla() {
+        window.actualizarTabla = function() {
             const cuerpo = document.getElementById('cuerpoTabla');
             cuerpo.innerHTML = '';
             let kmAc = kmInicialDelMes;
+            
+            // Función para mostrar SÓLO el día (DD)
+            const formatTableDate = (dateStr) => {
+                if (!dateStr || dateStr.length < 10) return '';
+                const [y, m, d] = dateStr.split('-');
+                return `${d}`;
+            };
+            if (!kmInicialDelMes && registros.length === 0) {
+                cuerpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;">Introduzca el KM inicial y añada registros para ver la tabla.</td></tr>`;
+                return;
+            }
             registros.forEach((r, i) => {
                 kmAc += r.kmRecorridos;
-                cuerpo.innerHTML += `<tr><td>${r.dia}</td><td style="text-align:left;padding-left:15px;">${r.ruta}</td><td class="number">${formatNumber(r.kmRecorridos)} km</td><td class="number">${formatNumber(kmAc)} km</td><td><button class="small-btn btn-edit" data-index="${i}">Editar</button><button class="small-btn btn-delete" data-index="${i}">Eliminar</button></td></tr>`;
+                // Usamos "km" solo en el resumen para ahorrar espacio en la tabla
+                cuerpo.innerHTML += `<tr><td>${formatTableDate(r.fecha)}</td><td style="text-align:left;">${r.ruta}</td><td class="number">${formatNumber(r.kmRecorridos)}</td><td class="number">${formatNumber(kmAc)}</td><td><button class="small-btn btn-edit" data-index="${i}">Edit</button><button class="small-btn btn-delete" data-index="${i}">Del</button></td></tr>`;
             });
             if (registros.length > 0) {
                 const tot = registros.reduce((s, r) => s + r.kmRecorridos, 0);
-                cuerpo.innerHTML += `<tr class="total-row"><td><strong>TOTALES</strong></td><td><strong>${registros.length} viajes registrados</strong></td><td class="number"><strong>${formatNumber(tot)} km</strong></td><td class="number"><strong>${formatNumber(kmInicialDelMes+tot)} km</strong></td><td></td></tr>`;
+                // La suma de viajes ahora usa la clase 'total-count' para el estilo de número
+                cuerpo.innerHTML += `<tr class="total-row"><td class="total-icon">Σ</td><td class="total-count" style="text-align:left;">${registros.length} viajes</td><td class="number"><strong>${formatNumber(tot)}</strong></td><td class="number"><strong>${formatNumber(kmInicialDelMes+tot)}</strong></td><td></td></tr>`;
             }
         }
-
-        function editarRegistro(index) {
+        window.editarRegistro = function(index) {
             const r = registros[index];
-            document.getElementById('dia').value = r.dia;
+            document.getElementById('fechaViaje').value = r.fecha;
             document.getElementById('ruta').value = r.ruta;
             document.getElementById('kmRecorridos').value = formatNumber(r.kmRecorridos);
+            document.getElementById('kmFinalHoy').value = ''; // Se limpia el campo opcional
+            // Eliminar el registro de la lista temporalmente para que se reemplace al agregarlo
             registros.splice(index, 1);
-            actualizarTabla();
-            actualizarResumen();
-            guardarDatos();
+            
+            guardarDatos(); // Re-guardar para reflejar la eliminación temporal en el acumulado
+            
+            mostrarAlerta('✍️ Modifica los campos y pulsa "Agregar" para actualizar.', '#fff3cd', '#856404', '#ffc107');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function eliminarRegistro(index) {
-            if (!confirm('¿Eliminar este registro?')) return;
+        /**
+         * Lógica de eliminación - eliminación directa sin confirmación
+         */
+        window.eliminarRegistro = function(index) {
+            const registroAborrar = registros[index];
             registros.splice(index, 1);
-            actualizarTabla();
-            actualizarResumen();
             guardarDatos();
+            mostrarAlerta(`🗑️ Registro del día ${registroAborrar.fecha} eliminado.`, '#f8d7da', '#721c24', '#dc3545');
         }
-
-        function actualizarResumen() {
+        /**
+         * Completa la función de resumen que estaba incompleta.
+         */
+        window.actualizarResumen = function() {
             const tot = registros.reduce((s, r) => s + r.kmRecorridos, 0);
             document.getElementById('totalKmMes').textContent = formatNumber(tot) + ' km';
             document.getElementById('kmInicialMes').textContent = formatNumber(kmInicialDelMes) + ' km';
             document.getElementById('kmFinalMes').textContent = formatNumber(kmInicialDelMes + tot) + ' km';
             document.getElementById('numeroViajes').textContent = registros.length;
         }
-
-        function limpiarTabla() {
-            if (registros.length === 0 && kmInicialDelMes === 0 && !document.getElementById('kmInicial').value) {
-                alert('No hay registros o datos iniciales para limpiar.');
-                return;
-            }
-
-            if (confirm('¿Seguro de limpiar todo?')) {
-                registros = [];
-                kmInicialDelMes = 0;
-                
-                // Reiniciamos los campos de entrada
-                document.getElementById('mesAnio').value = new Date().toISOString().slice(0, 7);
-                document.getElementById('kmInicial').value = '';
-                document.getElementById('kmFinalHoy').value = '';
-                document.getElementById('dia').value = '';
-                document.getElementById('ruta').value = '';
-                document.getElementById('kmRecorridos').value = '';
-                
-                localStorage.removeItem('controlKmData');
-                actualizarTabla();
-                actualizarResumen();
-
-                const alert = document.getElementById('loadAlert');
-                alert.textContent = '🗑️ Datos eliminados del navegador.';
-                alert.style.backgroundColor = '#f8d7da';
-                alert.style.color = '#721c24';
-                alert.style.borderLeftColor = '#dc3545';
-                alert.style.display = 'block';
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                    alert.style.backgroundColor = '';
-                    alert.style.color = '';
-                    alert.style.borderLeftColor = '';
-                }, 3000);
-            }
-        }
-
+        // --- Event Listener para botones Edit/Del (CRÍTICO) ---
+        // Este bloque asegura que los clics en los botones de la tabla llamen a las funciones correspondientes.
         document.getElementById('cuerpoTabla').addEventListener('click', function(event) {
             const target = event.target;
-            if (target.classList.contains('btn-edit')) {
-                const index = target.dataset.index;
-                editarRegistro(index);
-            } else if (target.classList.contains('btn-delete')) {
-                const index = target.dataset.index;
-                eliminarRegistro(index);
+            const index = target.dataset.index;
+            if (index !== undefined) {
+                const parsedIndex = parseInt(index, 10);
+                if (target.classList.contains('btn-edit')) {
+                    editarRegistro(parsedIndex);
+                } else if (target.classList.contains('btn-delete')) {
+                    eliminarRegistro(parsedIndex);
+                }
             }
         });
-
+        // --- Inicialización de la aplicación ---
         document.addEventListener('DOMContentLoaded', () => {
-            cargarDatos();
-            if (document.getElementById('mesAnio').value === '') {
-                document.getElementById('mesAnio').value = new Date().toISOString().slice(0, 7);
+            // 1. Establecer la fecha actual por defecto
+            if (!document.getElementById('fechaViaje').value) {
+                document.getElementById('fechaViaje').value = new Date().toISOString().slice(0, 10);
             }
+            
+            // 2. Aplicar formateadores de números
+            addInputFormatter('kmInicial');
+            addKmFinalFormatter();
+            addInputFormatter('kmRecorridos');
+            
+            // 3. Cargar datos iniciales
+            cargarDatos();
+            // 4. Listener para recargar datos al cambiar la fecha (para cambiar de mes)
+            document.getElementById('fechaViaje').addEventListener('change', cargarDatos);
+            // 5. Listener para guardar KM Inicial si se edita y se pierde el foco
+            document.getElementById('kmInicial').addEventListener('blur', () => {
+                if (document.getElementById('kmInicial').value.trim()) {
+                    guardarDatos();
+                }
+            });
         });
     </script>
 </body>
